@@ -1,0 +1,39 @@
+name: Update Theme Date
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  submitPR:
+    permissions: write-all
+    name: Update theme date after update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup python modules
+        run: |
+          pip3 install requests
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Rebuild theme
+        run: |
+          python3 scripts/update_theme_date.py "themes/$THEME_ID_PATH"
+
+      - name: Commit changes
+        run: |
+          git add themes.json
+          git add themes/*/theme.json
+          git commit -m "Update updatedAt field in theme.json after theme update"
+          git push
