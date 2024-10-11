@@ -20,10 +20,16 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Debug Git Diff
+        run: |
+          git fetch origin main
+          git diff --name-only origin/main...HEAD
+
       - name: Get changed folders
         id: get_changes
         run: |
-          changed_dirs=$(git diff --name-only HEAD~2 | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
+          git fetch origin main
+          changed_dirs=$(git diff --name-only origin/main...HEAD~1 | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
           echo "CHANGED_DIRS=$changed_dirs" >> $GITHUB_ENV
 
       - name: Debug Changed Directories
