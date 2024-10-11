@@ -44,7 +44,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          git add theme.json
-          git add themes/*/theme.json
+          for dir in $CHANGED_DIRS; do
+            git add "themes/$dir/theme.json"
+          done
           git commit -m "Update updatedAt field in theme.json after theme update"
           git push
