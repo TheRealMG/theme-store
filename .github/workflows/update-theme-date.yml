@@ -21,9 +21,14 @@ jobs:
       - name: Get changed folders
         id: get_changes
         run: |
-          # Get the list of modified directories in the themes folder
-          changed_dirs=$(git diff --name-only HEAD^ HEAD | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
+          changed_dirs=$(git diff --name-only $GITHUB_EVENT_BEFORE $GITHUB_SHA | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
           echo "CHANGED_DIRS=$changed_dirs" >> $GITHUB_ENV
+
+      - name: Debug Changed Directories
+        run: echo "$CHANGED_DIRS"
+
+      - name: Check Git Status
+        run: git status
 
       - name: Setup python modules
         run: |
