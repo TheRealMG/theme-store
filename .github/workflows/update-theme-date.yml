@@ -1,64 +1,62 @@
-name: Update Theme Date
+name: Update Theme Timestamps
+
 on:
+  pull_request:
+    types: [closed]
   push:
     branches:
       - main
-    paths:
-      - 'themes/**'
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  submitPR:
-    permissions: write-all
-    name: Update theme date after update
+  update-timestamp:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install python
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.9'  # or whichever version you prefer
 
-      - name: Debug Git Diff
+      - name: Detect changed files
+        id: changed-files
         run: |
-          git fetch origin main
-          git diff --name-only origin/main...HEAD
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          git diff --name-only HEAD^ HEAD >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-      - name: Get changed folders
-        id: get_changes
+      - name: Update updatedAt property
         run: |
-          git fetch origin main
-          changed_dirs=$(git diff --name-only origin/main...HEAD~1 | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
-          echo "CHANGED_DIRS=$changed_dirs" >> $GITHUB_ENV
+          theme_file = os.path.join(theme_path, "theme.json")
 
-      - name: Debug Changed Directories
-        run: echo "$CHANGED_DIRS"
+          if not os.path.exists(theme_file):
+              panic(f"{theme_file} not found.")
 
-      - name: Check Git Status
-        run: git status
+          # Load the theme JSON data
+          with open(theme_file, "r") as f:
+              try:
+                  theme_data = json.load(f)
+              except json.JSONDecodeError as e:
+                  panic("Error reading theme.json: " + str(e))
 
-      - name: Setup python modules
-        run: |
-          pip3 install requests
+          # Update the `updatedAt` field to the current date
+          theme_data["updatedAt"] = time.strftime("%Y-%m-%d")
 
-      - name: Setup Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Write the changes back to theme.json
+          with open(theme_file, "w") as f:
+              json.dump(theme_data, f, indent=4)
 
-      - name: Update theme date
-        if: env.CHANGED_DIRS != ''
-        run: |
-          for dir in $CHANGED_DIRS; do
-            # Assuming the theme ID is the same as the folder name
-            python3 scripts/update_theme_date.py "themes/$dir"
-          done
+          print(f"Updated `updatedAt` for {theme_path} to {theme_data['updatedAt']}")
 
       - name: Commit changes
         run: |
-          for dir in $CHANGED_DIRS; do
-            git add "themes/$dir/theme.json"
-          done
-          git commit -m "Update updatedAt field in theme.json after theme update"
-          git push
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add path/to/themes/**/*.json  # Adjust if needed
+          git commit -m "Update updatedAt timestamp on merge" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push origin main
