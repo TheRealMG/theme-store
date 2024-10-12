@@ -1,0 +1,15 @@
+{
+    "id": "f3be379f-fe1e-41c7-bf99-c1b6592f3d51",
+    "name": "Better Tab Indicators 5",
+    "description": "This Zen Theme provides some alternative styling for the tabs on the sidebar.",
+    "homepage": "https://github.com/TheRealMG/zen-themes/tree/main/BetterTabIndicators",
+    "style": "https://raw.githubusercontent.com/zen-browser/theme-store/main/themes/f3be379f-fe1e-41c7-bf99-c1b6592f3d51/chrome.css",
+    "readme": "https://raw.githubusercontent.com/zen-browser/theme-store/main/themes/f3be379f-fe1e-41c7-bf99-c1b6592f3d51/readme.md",
+    "image": "https://raw.githubusercontent.com/zen-browser/theme-store/main/themes/f3be379f-fe1e-41c7-bf99-c1b6592f3d51/image.png",
+    "author": "TheRealMG",
+    "version": "1.0.0",
+    "tags": [],
+    "createdAt": "2024-10-12",
+    "updatedAt": "2024-10-12",
+    "preferences": "https://raw.githubusercontent.com/zen-browser/theme-store/main/themes/f3be379f-fe1e-41c7-bf99-c1b6592f3d51/preferences.json"
+}
