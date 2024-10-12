@@ -1,33 +1,38 @@
 import os
 import json
 
-def update_theme_files(themes_json_path):
-    """Update each theme.json file based on themes.json data."""
-    # Load themes.json
-    with open(themes_json_path, 'r') as f:
+# Define the paths for the themes folder and the themes data file.
+THEMES_FOLDER = "./themes"
+THEMES_DATA_FILE = "./themes.json"
+
+def main():
+    # Load the themes data from the themes.json file
+    with open(THEMES_DATA_FILE, "r") as f:
         themes_data = json.load(f)
 
-    # Iterate through each theme in themes.json
-    for theme in themes_data:
-        theme_id = theme['id']
-        theme_json_path = os.path.join('themes', theme_id, 'theme.json')
+    # Iterate through each theme directory in the themes folder
+    for theme, theme_data in themes_data.items():
+        theme_folder = os.path.join(THEMES_FOLDER, theme)
+        theme_data_file = os.path.join(theme_folder, "theme.json")
 
-        # Check if theme.json file exists
-        if os.path.exists(theme_json_path):
-            # Update the theme.json file
-            with open(theme_json_path, 'r') as f:
-                theme_file_data = json.load(f)
+        if not os.path.isdir(theme_folder):
+            print(f"Skipping '{theme}': not a directory.")
+            continue  # Skip if not a directory
 
-            # Update fields
-            theme_file_data['createdAt'] = theme.get('createdAt', theme_file_data.get('createdAt'))
-            theme_file_data['updatedAt'] = theme.get('updatedAt', theme_file_data.get('updatedAt'))
-            theme_file_data['tags'] = theme.get('tags', theme_file_data.get('tags', []))
+        # Ensure the theme.json file exists
+        if not os.path.exists(theme_data_file):
+            print(f"Creating theme.json for '{theme}'.")
+            # Create an empty theme.json if it does not exist
+            with open(theme_data_file, "w") as f:
+                json.dump({}, f, indent=4)
 
-            # Write the updated theme data back to theme.json
-            with open(theme_json_path, 'w') as f:
-                json.dump(theme_file_data, f, indent=2)
-        else:
-            print(f"Theme JSON file not found for theme ID: {theme_id}")
+        # Open and write data to theme.json
+        with open(theme_data_file, "w") as f:
+            json.dump(theme_data, f, indent=4)  # Write the theme data to theme.json
+
+        print(f"Updated theme.json for '{theme}'.")  # Log update for the theme
+
+    print("Updated all theme.json files!")  # Final log message
 
 if __name__ == "__main__":
-    update_theme_files('themes.json')
+    main()  # Entry point of the script
