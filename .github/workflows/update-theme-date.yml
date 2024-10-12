@@ -31,42 +31,26 @@ jobs:
           changed_themes=$(git diff --name-only HEAD^1 HEAD | grep '^themes/' | awk -F/ '{print $2}' | sort -u)
           echo "CHANGED_THEMES=$changed_themes" >> $GITHUB_ENV
 
-      # - name: Detect changed files
-      #   id: changed-files
-      #   run: |
-      #     echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
-      #     git diff --name-only HEAD^ HEAD >> $GITHUB_ENV
-      #     echo "EOF" >> $GITHUB_ENV
+      - name: Setup python modules
+        run: |
+          pip3 install requests
+  
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # - name: Update updatedAt property
-      #   run: |
-      #     theme_file = os.path.join(theme_path, "theme.json")
+      - name: Update theme date
+        if: env.CHANGED_THEMES != ''
+        run: |
+          for theme in $CHANGED_THEMES; do
+            python3 scripts/update_theme_date.py "themes/$theme"
+          done
 
-      #     if not os.path.exists(theme_file):
-      #         panic(f"{theme_file} not found.")
-
-      #     # Load the theme JSON data
-      #     with open(theme_file, "r") as f:
-      #         try:
-      #             theme_data = json.load(f)
-      #         except json.JSONDecodeError as e:
-      #             panic("Error reading theme.json: " + str(e))
-
-      #     # Update the `updatedAt` field to the current date
-      #     theme_data["updatedAt"] = time.strftime("%Y-%m-%d")
-
-      #     # Write the changes back to theme.json
-      #     with open(theme_file, "w") as f:
-      #         json.dump(theme_data, f, indent=4)
-
-      #     print(f"Updated `updatedAt` for {theme_path} to {theme_data['updatedAt']}")
-
-      # - name: Commit changes
-      #   run: |
-      #     git config --local user.email "action@github.com"
-      #     git config --local user.name "GitHub Action"
-      #     git add path/to/themes/**/*.json  # Adjust if needed
-      #     git commit -m "Update updatedAt timestamp on merge" || echo "No changes to commit"
-
-      # - name: Push changes
-      #   run: git push origin main
+      - name: Commit changes
+        run: |
+          for theme in $CHANGED_THEMES; do
+            git add "themes/$theme/theme.json"
+          done
+          git commit -m "Update theme.json for $CHANGED_THEMES"
+          git push
