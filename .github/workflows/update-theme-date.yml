@@ -19,12 +19,16 @@ jobs:
           fetch-depth: 2
 
       - name: Get changes
-        run: git diff --name-only HEAD^1 HEAD
+        run: |
+          git diff --name-only HEAD^1 HEAD | grep '^themes/' | awk -F/ '{print $2}' | sort -u
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # or whichever version you prefer
+          python-version: '3.x'
+
+      - name: Detect changed files
+        run: 
 
       # - name: Detect changed files
       #   id: changed-files
